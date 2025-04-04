@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"sample_go/dll"
+	"sample_go/ds/lru/dll"
 )
 
 var hm map[int]*dll.Node = make(map[int]*dll.Node)
