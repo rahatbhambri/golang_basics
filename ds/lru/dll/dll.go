@@ -1,45 +1,23 @@
 package dll
 
+import (
+	"fmt"
+	"log"
+)
+
 type Node struct {
 	Val  []int
 	next *Node
 	prev *Node
 }
 
-var Head *Node
-var Tail *Node
+type DLL struct {
+	Head *Node
+	Tail *Node
+}
 
-// func main() {
-
-// 	appendLeft(4)
-// 	printList()
-// 	appendLeft(5)
-// 	printList()
-// 	appendLeft(6)
-// 	printList()
-// 	appendLeft(7)
-// 	printList()
-// 	appendRight(10)
-// 	appendRight(9)
-// 	appendRight(8)
-// 	printList()
-// 	insert(2, 20)
-// 	insert(2, 40)
-// 	insert(2, 60)
-
-// 	println("Deletion!")
-// 	printList()
-// 	delete(2)
-
-// 	printList()
-// 	delete(2)
-
-// 	printList()
-// 	delete(2)
-// 	printList()
-// }
-
-func AppendRight(Val []int) *Node {
+func (dll *DLL) AppendRight(Val []int) *Node {
+	Head, Tail := dll.Head, dll.Tail
 	if Head == nil {
 		Head = &Node{Val, nil, nil}
 		Tail = Head
@@ -48,66 +26,33 @@ func AppendRight(Val []int) *Node {
 		Tail.next = nn
 		Tail = nn
 	}
+
+	dll.Head, dll.Tail = Head, Tail
 	return Tail
 }
 
-func AppendLeft(Val []int) {
+func (dll *DLL) AppendLeft(Val []int) {
+	Head, Tail := dll.Head, dll.Tail
+
+	log.Println(Tail)
+	// empty list
 	if Head == nil {
 		Head = &Node{Val, nil, nil}
 		Tail = Head
 	} else {
-		nn := &Node{Val, nil, Tail}
-		Tail.next = nn
-		Tail = nn
+		nn := &Node{Val, Head, nil}
+		Head.prev = nn
+		Head = nn
 	}
+	dll.Head, dll.Tail = Head, Tail
 }
 
-func GetNodes(pos int) (*Node, *Node, *Node) {
-	c := 0
-	temp := Head
+func (dll *DLL) PrintList() {
 
-	for {
-		if pos != c {
-			temp = temp.next
-			c += 1
-		} else {
-			break
-		}
-	}
-
-	var curr_pre *Node
-	var curr_nxt *Node
-
-	if temp.prev != nil {
-		curr_pre = temp.prev
-	} else {
-		curr_pre = nil
-	}
-
-	if temp.next != nil {
-		curr_nxt = temp.next
-	} else {
-		curr_nxt = nil
-	}
-
-	return curr_pre, temp, curr_nxt
-}
-
-func Insert(pos int, Val []int) {
-
-	curr_pre, temp, _ := GetNodes(pos)
-	nn := &Node{Val, temp, curr_pre}
-	temp.prev = nn
-	curr_pre.next = nn
-}
-
-func PrintList() {
-
-	temp := Head
-
+	temp := dll.Head
 	for {
 		if temp != nil {
-			print(temp.Val, " ")
+			fmt.Println(temp.Val, " ")
 			temp = temp.next
 		} else {
 			break
@@ -116,50 +61,66 @@ func PrintList() {
 	println()
 }
 
-func Delete(pos int) {
-	curr_pre, temp, curr_nxt := GetNodes(pos)
+func (dll *DLL) Delete(node *Node) {
+	Head, Tail := dll.Head, dll.Tail
 
-	if pos == 0 {
-		Head = Head.next
+	P, N := node.prev, node.next
+
+	if node == Head {
+		nxt := Head.next
+		Head.next = nil
+		nxt.prev = nil
+		Head = nxt
+
+		if node == Tail {
+			Tail = nil
+		}
+
+		dll.Head, dll.Tail = Head, Tail
+		return
 	}
 
-	if curr_pre != nil {
-		curr_pre.next = curr_nxt
+	if node == Tail {
+		pv := Tail.prev
+		Tail.prev = nil
+		pv.next = nil
+		Tail = pv
+
+		dll.Head, dll.Tail = Head, Tail
+		return
 	}
 
-	if curr_nxt != nil {
-		curr_nxt.prev = curr_pre
-	}
+	node.next = nil
+	node.prev = nil
 
-	temp.next = nil
-	temp.prev = nil
+	P.next = N
+	N.prev = P
+
+	dll.Head, dll.Tail = Head, Tail
+
 }
 
-func RelocateNode(node *Node) {
+func (dll *DLL) RelocateNode(node *Node) {
+	Head, Tail := dll.Head, dll.Tail
+
+	// Moves the node to the tail of linked list
 
 	if node == Tail {
 		return
 	}
 
-	curr_pre := node.prev
-	curr := node
-	curr_nxt := node.next
-
-	if curr_pre == nil {
-		Head = curr_nxt
+	if node == Head {
+		Head = Head.next
+		Head.prev = nil
+	} else {
+		P, N := node.prev, node.next
+		P.next = N
+		N.prev = P
 	}
-
-	curr.prev = Tail
-	curr.next = nil
+	node.prev = Tail
 	Tail.next = node
-	Tail = curr
+	node.next = nil
+	Tail = node
 
-	if curr_pre != nil {
-		curr_pre.next = curr_nxt
-	}
-
-	if curr_nxt != nil {
-		curr_nxt.prev = curr_pre
-	}
-
+	dll.Head, dll.Tail = Head, Tail
 }
